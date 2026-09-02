@@ -1,4 +1,4 @@
-```tsx
+
 import React from 'react';
 import {
   Pressable,
@@ -35,7 +35,7 @@ export default function HomeScreen() {
         <Text style={styles.headerTitle}>STUDENT PROFILE</Text>
 
         <Text style={styles.greeting}>
-          Hello, Mark! 👋
+          Hello, Mark! 
         </Text>
 
         <Text style={styles.headerSubtitle}>
@@ -88,7 +88,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          👨‍💻 About Me
+          About Me
         </Text>
 
         <Text style={[styles.description, { color: colors.secondary }]}>
@@ -110,7 +110,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          📋 Personal Information
+        Personal Information
         </Text>
 
         <InfoRow
@@ -150,7 +150,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          🎮 My Hobbies
+           My Hobbies
         </Text>
 
         <View style={styles.hobbyContainer}>
@@ -160,7 +160,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.lightBlue },
             ]}
           >
-            <Text style={styles.hobbyEmoji}>🏀</Text>
+            <Text style={styles.hobbyEmoji}></Text>
 
             <Text style={[styles.hobbyText, { color: colors.text }]}>
               Basketball
@@ -193,7 +193,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          💻 Coding Experience
+          Coding Experience
         </Text>
 
         <Text style={[styles.description, { color: colors.secondary }]}>
@@ -215,7 +215,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          🚀 What I Want To Learn
+           What I Want To Learn
         </Text>
 
         <Text style={[styles.description, { color: colors.secondary }]}>
@@ -233,7 +233,7 @@ export default function HomeScreen() {
         ]}
       >
         <Text style={styles.goalTitle}>
-          🌐 My Career Goal
+           My Career Goal
         </Text>
 
         <Text style={styles.goalText}>
@@ -249,7 +249,7 @@ export default function HomeScreen() {
         onPress={() => router.push('/modal')}
       >
         <Text style={styles.buttonText}>
-          💡 About My App
+          About My App
         </Text>
       </Pressable>
 
@@ -490,4 +490,3 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
 });
-```
