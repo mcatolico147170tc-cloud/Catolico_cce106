@@ -1,6 +1,7 @@
 {
   "name": "study-flow",
   "main": "expo-router/entry",
+  
   "version": "1.0.0",
   "dependencies": {
     "@expo/ui": "~57.0.18",
