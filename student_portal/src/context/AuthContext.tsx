@@ -1,53 +1,144 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { saveSession, loadSession, clearSession, StoredUser } from '../api/secureStorage';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
-type AuthContextValue = {
-  isRestoring: boolean;
+import {
+  getProfile,
+  loginRequest,
+} from '../api/api.auth';
+
+import type { UserProfile } from '../api/api.auth';
+
+import {
+  getToken,
+  removeToken,
+  saveToken,
+} from '../api/secureStorage';
+
+type AuthContextType = {
+  user: UserProfile | null;
   token: string | null;
-  user: StoredUser | null;
-  signIn: (token: string, user: StoredUser) => Promise<void>;
-  signOut: () => Promise<void>;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isRestoring, setIsRestoring] = useState(true);
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<StoredUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  /*
+   * Restore the previous session when the app starts.
+   */
   useEffect(() => {
-    (async () => {
-      const restored = await loadSession();
-      if (restored) {
-        setToken(restored.token);
-        setUser(restored.user);
+    restoreSession();
+  }, []);
+
+  /*
+   * Restore token and protected profile.
+   */
+  async function restoreSession(): Promise<void> {
+    try {
+      const storedToken = await getToken();
+
+      if (!storedToken) {
+        setToken(null);
+        setUser(null);
+        return;
       }
-      setIsRestoring(false);
-    })();
-  }, []);
 
-  const signIn = useCallback(async (newToken: string, newUser: StoredUser) => {
-    await saveSession(newToken, newUser);
-    setToken(newToken);
-    setUser(newUser);
-  }, []);
+      const profile = await getProfile(storedToken);
 
-  const signOut = useCallback(async () => {
-    await clearSession();
+      setToken(storedToken);
+      setUser(profile);
+    } catch (error) {
+      console.log('Session restore failed:', error);
+
+      await removeToken();
+
+      setToken(null);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  /*
+   * Login:
+   * credentials → token → secure storage → user
+   */
+  async function login(
+    email: string,
+    password: string
+  ): Promise<void> {
+    const response = await loginRequest(
+      email,
+      password
+    );
+
+    if (!response.token) {
+      throw new Error(
+        'Login succeeded but no authentication token was returned.'
+      );
+    }
+
+    await saveToken(response.token);
+
+    setToken(response.token);
+    setUser(response.user);
+  }
+
+  /*
+   * Logout:
+   * remove token → clear authentication state
+   */
+  async function logout(): Promise<void> {
+    await removeToken();
+
     setToken(null);
     setUser(null);
-  }, []);
+  }
+
+  const isAuthenticated =
+    token !== null && user !== null;
 
   return (
-    <AuthContext.Provider value={{ isRestoring, token, user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isLoading,
+        isAuthenticated,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+
+  if (context === undefined) {
+    throw new Error(
+      'useAuth must be used inside AuthProvider'
+    );
+  }
+
+  return context;
 }
